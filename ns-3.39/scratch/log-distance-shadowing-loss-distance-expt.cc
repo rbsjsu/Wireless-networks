@@ -104,17 +104,23 @@ int main (int argc, char *argv[])
 	std::string Mean = "0";
 	std::string Variance = "2";
 	std::string Exponent = "2.5";
+	std::string outputPlot = "output-shadow";
+	std::string outputPlotPdf = "rxPower-pdf-logDistanceShadowing";
+
 	CommandLine cmd(__FILE__);
 	cmd.AddValue("exponent", "Exponent for the log distance path loss", Exponent);
 	cmd.AddValue("mean", "Mean for gaussian random variable", Mean);
 	cmd.AddValue("variance", "variance for the gaussian random varible", Variance);
+	cmd.AddValue("plotFile", "output plot file name", outputPlot);
+	cmd.AddValue("plotPdfFile", "output plot pdf file name", outputPlotPdf);
+
   cmd.Parse (argc, argv);
-  std::ofstream plotFile ("output-shadow.plt");
+  std::ofstream plotFile (outputPlot+".plt");
 
   //Set the random seed value
   RngSeedManager::SetSeed (3);  
   
-  GnuplotCollection gnuplots ("rxPower-pdf-logDistanceShadowing.pdf");
+  GnuplotCollection gnuplots (outputPlotPdf+".pdf");
 
   {
 	Gnuplot plot;
@@ -127,7 +133,7 @@ int main (int argc, char *argv[])
 	randomProp->SetAttribute("Exponent", DoubleValue(std::stod(Exponent)));
 	randomProp->SetAttribute("Variable", StringValue ("ns3::NormalRandomVariable[Mean="+Mean+"|Variance="+Variance+"]"));
 	
-        for (double distance = 200.0; distance <= 500.0; distance += 50.0)
+        for (double distance = 200.0; distance <= 400.0; distance += 50.0)
 	{
 		Gnuplot2dDataset dataset = TestProbabilistic (randomProp, distance);
 		//New dataset for each distance. Adds a line to the plot
@@ -137,7 +143,7 @@ int main (int argc, char *argv[])
 		plot.AddDataset(dataset);
 	}
 	
-    plot.SetTitle ("LogDistanceShadowingPropogationModel");
+    plot.SetTitle ("LogShadowingPropogationModel( Exponent = "+Exponent+" | Mean = "+Mean+" | Variance = "+Variance+")" );
     gnuplots.AddPlot (plot);
   }
   
