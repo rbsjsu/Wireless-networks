@@ -57,7 +57,7 @@ static double dround (double number, double precision)
 }
 
 static Gnuplot2dDataset
-TestProbabilistic (Ptr<PropagationLossModel> model, double distance, unsigned int samples = 1000)
+TestProbabilistic (Ptr<PropagationLossModel> model, double distance, unsigned int samples = 100000)
 {
 	Ptr<ConstantPositionMobilityModel> a = CreateObject<ConstantPositionMobilityModel> ();
 	Ptr<ConstantPositionMobilityModel> b = CreateObject<ConstantPositionMobilityModel> ();
@@ -100,14 +100,21 @@ TestProbabilistic (Ptr<PropagationLossModel> model, double distance, unsigned in
 
 int main (int argc, char *argv[])
 {
-  CommandLine cmd;
+  
+	std::string Mean = "0";
+	std::string Variance = "2";
+	std::string Exponent = "2.5";
+	CommandLine cmd(__FILE__);
+	cmd.AddValue("exponent", "Exponent for the log distance path loss", Exponent);
+	cmd.AddValue("mean", "Mean for gaussian random variable", Mean);
+	cmd.AddValue("variance", "variance for the gaussian random varible", Variance);
   cmd.Parse (argc, argv);
   std::ofstream plotFile ("output-shadow.plt");
 
   //Set the random seed value
   RngSeedManager::SetSeed (3);  
   
-  GnuplotCollection gnuplots ("rxPower-pdf-random1.pdf");
+  GnuplotCollection gnuplots ("rxPower-pdf-logDistanceShadowing.pdf");
 
   {
 	Gnuplot plot;
@@ -117,8 +124,8 @@ int main (int argc, char *argv[])
 
     // Random propagation model with uniform random distribution
 	Ptr<LogDistanceShadowingPropagationLossModel> randomProp = CreateObject<LogDistanceShadowingPropagationLossModel> ();
-	randomProp->SetAttribute("Exponent", DoubleValue(2.5));
-	randomProp->SetAttribute("Variable", StringValue ("ns3::NormalRandomVariable[Mean=0|Variance=2]"));
+	randomProp->SetAttribute("Exponent", DoubleValue(std::stod(Exponent)));
+	randomProp->SetAttribute("Variable", StringValue ("ns3::NormalRandomVariable[Mean="+Mean+"|Variance="+Variance+"]"));
 	
         for (double distance = 200.0; distance <= 500.0; distance += 50.0)
 	{
