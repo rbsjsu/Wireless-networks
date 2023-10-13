@@ -102,12 +102,12 @@ int main (int argc, char *argv[])
 {
   CommandLine cmd;
   cmd.Parse (argc, argv);
-  std::ofstream plotFile ("output.plt");
-  
+  std::ofstream plotFile ("output-shadow.plt");
+
   //Set the random seed value
   RngSeedManager::SetSeed (3);  
   
-  GnuplotCollection gnuplots ("rxPower-pdf-random.pdf");
+  GnuplotCollection gnuplots ("rxPower-pdf-random1.pdf");
 
   {
 	Gnuplot plot;
@@ -116,11 +116,11 @@ int main (int argc, char *argv[])
 	plot.AppendExtra ("set key outside");
 
     // Random propagation model with uniform random distribution
-	Ptr<RandomPropagationLossModel> randomProp = CreateObject<RandomPropagationLossModel> ();
-	//Variable: The random variable used to pick a loss everytime CalcRxPower is invoked
-	randomProp->SetAttribute("Variable", StringValue ("ns3::NormalRandomVariable[Mean=0|Variance=0]"));
+	Ptr<LogDistanceShadowingPropagationLossModel> randomProp = CreateObject<LogDistanceShadowingPropagationLossModel> ();
+	randomProp->SetAttribute("Exponent", DoubleValue(2.5));
+	randomProp->SetAttribute("Variable", StringValue ("ns3::NormalRandomVariable[Mean=0|Variance=2]"));
 	
-        for (double distance = 50.0; distance <= 200.0; distance += 50.0)
+        for (double distance = 200.0; distance <= 500.0; distance += 50.0)
 	{
 		Gnuplot2dDataset dataset = TestProbabilistic (randomProp, distance);
 		//New dataset for each distance. Adds a line to the plot
@@ -130,7 +130,7 @@ int main (int argc, char *argv[])
 		plot.AddDataset(dataset);
 	}
 	
-    plot.SetTitle ("RandomPropagationLossModel");
+    plot.SetTitle ("LogDistanceShadowingPropogationModel");
     gnuplots.AddPlot (plot);
   }
   
